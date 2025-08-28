@@ -5,8 +5,9 @@ import vosk
 import sys
 import json
 
-from voice import voice_callback
+from voice import *
 from functions import *
+from ai_sort import *
 
 import torch
 # Задаём параметры аудио
@@ -32,27 +33,94 @@ def callback(indata, frames, time, status):
 rec = vosk.KaldiRecognizer(model, samplerate)
 
 
+request_count = 0
+flag_ready = True
+flag_commands = False
 with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
                        channels=channels, callback=callback):
     print("Начинаю распознавание. Говорите...\n")
+    voice_callback('ready', chunk)
     while True:
         data = q.get()
         if rec.AcceptWaveform(data):
             result = rec.Result()
             text = json.loads(result).get("text", "")
-            print(f"Распознано: {text}")
             
-            flag = False
+            if flag_ready:
+                if text=='хан':
+                    voice_callback('hello-night', chunk)
+                    flag_ready=False
+                    flag_commands=True
+                    request_count+=1
+                elif text == 'хан' and request_count >= 1:
+                    voice_callback('hello', chunk)
+                    flag_ready=False
+                    flag_commands=True
             
-            if text == 'кира':
-                voice_callback('test', chunk)
-                flag=True
-            if flag:
-                pass
-            
-            
+            if flag_commands:
+                if text.strip() == "":
+                    continue
+                answer = final_query_handler(text)
+                print('Флаг включен')
+                if answer == 'погода':
+                    print(get_weather(text))
+                    voice_for_answer(get_weather(text), chunk)
+                elif answer == 'браузер':
+                    pass
+                elif answer == 'время':
+                    pass
+                elif answer == 'стим':
+                    pass
+                elif answer == 'музыка':
+                    pass
+            listening_for_activation = True
+            listening_for_commands = False
         else:
             partial_result = rec.PartialResult()
             
 
+
+
+# if text == 'хан':
+#                 voice_callback('hello-night', chunk)
+#                 flag=True
+#                 request_count+=1
+#                 if flag:
+#                     result = rec.Result()
+#                     text = json.loads(result).get("text", "")
+#                     answer = final_query_handler(text)
+#                     print('Флаг включен')
+#                     if answer == 'погода':
+#                         print(get_weather(text))
+#                         voice_for_answer(get_weather(text), chunk)
+#                     elif answer == 'браузер':
+#                         pass
+#                     elif answer == 'время':
+#                         pass
+#                     elif answer == 'стим':
+#                         pass
+#                     elif answer == 'музыка':
+#                         pass
+                    
+#                     flag = False 
+#             elif text == 'хан' and request_count >= 1:
+#                 voice_callback('hello', chunk)
+#                 flag=True    
+#                 if flag:
+#                     answer = final_query_handler(text)
+#                     print('Флаг включен')
+#                     if answer == 'погода':
+#                         print(get_weather(text))
+#                         voice_for_answer(get_weather(text), chunk)
+#                     elif answer == 'браузер':
+#                         pass
+#                     elif answer == 'время':
+#                         pass
+#                     elif answer == 'стим':
+#                         pass
+#                     elif answer == 'музыка':
+#                         pass
+                    
+#                     flag = False
+                
             

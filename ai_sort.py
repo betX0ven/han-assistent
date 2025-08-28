@@ -42,12 +42,9 @@ def semantic_search(query, embeddings, top_n=3):
     
     return all_answers[top_results[0]]
 
-
 def start_ai(query):
     response = semantic_search(query, text_embeddings)
     return text_clear(preparing_query(response))
-
-# query = text_clear("Какая сейчас погода")
 
 def preparing_query(query):
     total_query = ''
@@ -56,7 +53,6 @@ def preparing_query(query):
         total_query+=word.normal_form+" "
     return total_query
 
-# while True:
-#   query = input("Введите запрос: ")
-#   print(text_clear(preparing_query(query)))
-#   print(start_ai(text_clear(preparing_query(query))))
+def final_query_handler(query):
+    print(query)
+    return start_ai(text_clear(preparing_query(query)))
