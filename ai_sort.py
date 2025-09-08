@@ -7,26 +7,13 @@ import pymorphy3
 
 morph = pymorphy3.MorphAnalyzer()
 
-model = SentenceTransformer("gmunkhtur/paraphrase-multilingual-minilm-l12-v3-mn")
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v2")
 
 all_answers = ['погода', 'время', 'стим', 'браузер', 'музыка']
 
 banword = ["как, он, мы, его, вы, вам, вас, ее, что, который, их, все, они, я, весь, мне, меня, таким, для, на, по, со, из, от, до, без, над, под, за, при, после, во, же, то, бы, всего, итого, даже, да, нет, ой, ого, эх, браво, здравствуйте, спасибо, извините, пожалуйста".replace(",","").split()][0]
-def text_clear(query:str):
-    ignorechars = r''',:\—=/|'%*"?<>!-_'''
-    query = str(query).lower()
-    queryC = ""
-    for i in query:
-        if i not in ignorechars:
-            queryC += i
 
-    banwordC = ""
-    for i in queryC.split():
-        if i not in banword:
-            banwordC += i+" "
-    return banwordC
-
-tags = [text_clear(i) for i in all_answers]
+tags = [i for i in all_answers]
 
 text_embeddings = model.encode(tags, convert_to_tensor=True)
 
@@ -40,11 +27,16 @@ def semantic_search(query, embeddings, top_n=3):
     # Получаем индексы наиболее похожих текстов
     top_results = np.argsort(similarities.cpu().numpy())[-top_n:][::-1]
     
-    return all_answers[top_results[0]]
+    for i in range(len(top_results)):
+        print(similarities[top_results[i]], tags[top_results[i]])
+    if float(similarities[top_results[0]]) > 0.49:
+        return all_answers[top_results[0]]
+    else:
+        return "Это для гпт"
 
 def start_ai(query):
     response = semantic_search(query, text_embeddings)
-    return text_clear(preparing_query(response))
+    return response
 
 def preparing_query(query):
     total_query = ''
@@ -54,5 +46,5 @@ def preparing_query(query):
     return total_query
 
 def final_query_handler(query):
-    print(query)
-    return start_ai(text_clear(preparing_query(query)))
+    print('Запрос ' + query)
+    return start_ai(preparing_query(query))

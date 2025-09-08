@@ -27,3 +27,5 @@ city = 'Yuzhno-Sakhalinsk'
 def search_web(query):
     url = f"https://www.google.com/search?q={query}"
     webbrowser.open(url)
+    
+print(get_weather('Южно-Сахалинск'))

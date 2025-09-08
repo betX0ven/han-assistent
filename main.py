@@ -5,16 +5,17 @@ import vosk
 import sys
 import json
 
-from voice import *
+from tts import *
 from functions import *
 from ai_sort import *
-
 import torch
 # Задаём параметры аудио
 samplerate = 16000  
 device = None       
 channels = 1
 chunk = 1024  
+
+tts=TTS()
 
 model_path = "vosk-model-ru-0.10"
 if not os.path.exists(model_path):
@@ -39,7 +40,7 @@ flag_commands = False
 with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
                        channels=channels, callback=callback):
     print("Начинаю распознавание. Говорите...\n")
-    voice_callback('ready', chunk)
+    voice_fast_callback('ready', chunk)
     while True:
         data = q.get()
         if rec.AcceptWaveform(data):
@@ -48,23 +49,26 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
             
             if flag_ready:
                 if text=='хан':
-                    voice_callback('hello-night', chunk)
+                    voice_fast_callback('hello-night', chunk)
                     flag_ready=False
                     flag_commands=True
+                    text=""
                     request_count+=1
                 elif text == 'хан' and request_count >= 1:
-                    voice_callback('hello', chunk)
+                    voice_fast_callback('hello', chunk)
                     flag_ready=False
                     flag_commands=True
+                    text=""
             
             if flag_commands:
+                print(text)
                 if text.strip() == "":
                     continue
                 answer = final_query_handler(text)
-                print('Флаг включен')
+                print(answer)
                 if answer == 'погода':
-                    print(get_weather(text))
-                    voice_for_answer(get_weather(text), chunk)
+                    weather = get_weather('Yuzhno-Sakhalinsk')
+                    tts.text2speech(weather)
                 elif answer == 'браузер':
                     pass
                 elif answer == 'время':
@@ -73,8 +77,8 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                     pass
                 elif answer == 'музыка':
                     pass
-            listening_for_activation = True
-            listening_for_commands = False
+            flag_ready = True
+            flag_commands = False
         else:
             partial_result = rec.PartialResult()
             
