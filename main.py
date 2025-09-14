@@ -9,6 +9,18 @@ from tts import *
 from functions import *
 from ai_sort import *
 import torch
+
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import torch
+
+GENMODEL = "google/flan-t5-large"   
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+tok = AutoTokenizer.from_pretrained(GENMODEL)
+gen = AutoModelForSeq2SeqLM.from_pretrained(GENMODEL).to(DEVICE)
+
+from LLM import generateanswer
+
 # Задаём параметры аудио
 samplerate = 16000  
 device = None       
@@ -67,7 +79,7 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                 answer = final_query_handler(text)
                 print(answer)
                 if answer == 'погода':
-                    weather = get_weather('Yuzhno-Sakhalinsk')
+                    weather = get_weather('Южно-Сахалинск')
                     tts.text2speech(weather)
                 elif answer == 'браузер':
                     pass
@@ -77,54 +89,11 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                     pass
                 elif answer == 'музыка':
                     pass
+                elif answer == 'for_ai':
+                    answer = translate_text_to_rus(generateanswer(translate_text_to_eng(text)))
+                    tts.text2speech(answer)
             flag_ready = True
             flag_commands = False
         else:
             partial_result = rec.PartialResult()
-            
-
-
-
-# if text == 'хан':
-#                 voice_callback('hello-night', chunk)
-#                 flag=True
-#                 request_count+=1
-#                 if flag:
-#                     result = rec.Result()
-#                     text = json.loads(result).get("text", "")
-#                     answer = final_query_handler(text)
-#                     print('Флаг включен')
-#                     if answer == 'погода':
-#                         print(get_weather(text))
-#                         voice_for_answer(get_weather(text), chunk)
-#                     elif answer == 'браузер':
-#                         pass
-#                     elif answer == 'время':
-#                         pass
-#                     elif answer == 'стим':
-#                         pass
-#                     elif answer == 'музыка':
-#                         pass
-                    
-#                     flag = False 
-#             elif text == 'хан' and request_count >= 1:
-#                 voice_callback('hello', chunk)
-#                 flag=True    
-#                 if flag:
-#                     answer = final_query_handler(text)
-#                     print('Флаг включен')
-#                     if answer == 'погода':
-#                         print(get_weather(text))
-#                         voice_for_answer(get_weather(text), chunk)
-#                     elif answer == 'браузер':
-#                         pass
-#                     elif answer == 'время':
-#                         pass
-#                     elif answer == 'стим':
-#                         pass
-#                     elif answer == 'музыка':
-#                         pass
-                    
-#                     flag = False
-                
             

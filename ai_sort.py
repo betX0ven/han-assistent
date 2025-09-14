@@ -29,10 +29,10 @@ def semantic_search(query, embeddings, top_n=3):
     
     for i in range(len(top_results)):
         print(similarities[top_results[i]], tags[top_results[i]])
-    if float(similarities[top_results[0]]) > 0.49:
+    if float(similarities[top_results[0]]) > 0.53:
         return all_answers[top_results[0]]
     else:
-        return "Это для гпт"
+        return "for_ai"
 
 def start_ai(query):
     response = semantic_search(query, text_embeddings)
