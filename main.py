@@ -19,7 +19,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 tok = AutoTokenizer.from_pretrained(GENMODEL)
 gen = AutoModelForSeq2SeqLM.from_pretrained(GENMODEL).to(DEVICE)
 
-from LLM import generateanswer
+from LLM2 import generate_answer
 
 # Задаём параметры аудио
 samplerate = 16000  
@@ -58,9 +58,9 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
         if rec.AcceptWaveform(data):
             result = rec.Result()
             text = json.loads(result).get("text", "")
-            
+            # print(text)
             if flag_ready:
-                if text=='хан':
+                if text=='хан' and request_count == 0:
                     voice_fast_callback('hello-night', chunk)
                     flag_ready=False
                     flag_commands=True
@@ -90,7 +90,7 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                 elif answer == 'музыка':
                     pass
                 elif answer == 'for_ai':
-                    answer = translate_text_to_rus(generateanswer(translate_text_to_eng(text)))
+                    answer = generate_answer(text)
                     tts.text2speech(answer)
             flag_ready = True
             flag_commands = False

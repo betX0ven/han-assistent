@@ -7,7 +7,7 @@ import pymorphy3
 
 morph = pymorphy3.MorphAnalyzer()
 
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v2")
+model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 
 all_answers = ['погода', 'время', 'стим', 'браузер', 'музыка']
 
@@ -27,8 +27,8 @@ def semantic_search(query, embeddings, top_n=3):
     # Получаем индексы наиболее похожих текстов
     top_results = np.argsort(similarities.cpu().numpy())[-top_n:][::-1]
     
-    for i in range(len(top_results)):
-        print(similarities[top_results[i]], tags[top_results[i]])
+    # for i in range(len(top_results)):
+    #     print(similarities[top_results[i]], tags[top_results[i]])
     if float(similarities[top_results[0]]) > 0.53:
         return all_answers[top_results[0]]
     else:
@@ -46,5 +46,5 @@ def preparing_query(query):
     return total_query
 
 def final_query_handler(query):
-    print('Запрос ' + query)
+    print('Запрос: ' + query)
     return start_ai(preparing_query(query))
