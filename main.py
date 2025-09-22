@@ -92,6 +92,7 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                 elif answer == 'for_ai':
                     answer = generate_answer(text)
                     tts.text2speech(answer)
+                
             flag_ready = True
             flag_commands = False
         else:

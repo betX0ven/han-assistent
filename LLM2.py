@@ -22,4 +22,4 @@ def generate_answer(prompt):
     return response.choices[0].message.content
 
 
-print(generate_answer("Расскажи про Окарина"))
+# print(generate_answer("Я использую silero tts для озвучивания текста. Но он не озвучивает числа. Как исправить? если что я использую его в коде"))

@@ -3,6 +3,8 @@ import torch
 import time
 import pyaudio  
 import wave  
+import re
+from num2words import num2words
 
 # константы голосов, поддерживаемых в silero
 SPEAKER_AIDAR   = "aidar"
@@ -38,7 +40,7 @@ class TTS:
         self.__SAMPLERATE__ = samplerate
     
     def text2speech(self, text: str):
-
+        text = re.sub(r'\d+', lambda x: num2words(int(x.group()), lang='ru'), text)
         audio = self.__MODEL__.apply_tts(
             text=text,               
             speaker=self.__SPEAKER__,
