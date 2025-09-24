@@ -1,3 +1,4 @@
+import datetime
 import requests
 import webbrowser
 from translate import Translator
@@ -47,3 +48,7 @@ def translate_text_to_eng(text, from_lang='ru', to_lang='en'):
     except Exception as e:
         # Если возникает ошибка, возвращаем сообщение об ошибке
         return f"Error: {e}"
+
+def get_time():
+    now = datetime.datetime.now()
+    return now.strftime("%H часов %M минут")

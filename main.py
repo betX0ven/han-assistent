@@ -4,20 +4,11 @@ import sounddevice as sd
 import vosk
 import sys
 import json
-
+import random
 from tts import *
 from functions import *
 from ai_sort import *
 import torch
-
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import torch
-
-GENMODEL = "google/flan-t5-large"   
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-tok = AutoTokenizer.from_pretrained(GENMODEL)
-gen = AutoModelForSeq2SeqLM.from_pretrained(GENMODEL).to(DEVICE)
 
 from LLM2 import generate_answer
 
@@ -45,10 +36,11 @@ def callback(indata, frames, time, status):
 
 rec = vosk.KaldiRecognizer(model, samplerate)
 
-
+thanks = ["urwelcome", "urwelcome2", "urwelcome3"]
 request_count = 0
 flag_ready = True
 flag_commands = False
+flag_browser = False
 with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dtype='int16',
                        channels=channels, callback=callback):
     print("Начинаю распознавание. Говорите...\n")
@@ -72,7 +64,13 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                     flag_commands=True
                     text=""
             
-            if flag_commands:
+            if flag_browser:
+                if text.strip() == "":
+                    continue
+                search_web(text)
+                flag_browser = False
+            
+            if flag_commands and not flag_browser:
                 print(text)
                 if text.strip() == "":
                     continue
@@ -82,9 +80,13 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                     weather = get_weather('Южно-Сахалинск')
                     tts.text2speech(weather)
                 elif answer == 'браузер':
-                    pass
+                    voice_fast_callback('run-browser', chunk)
+                    tts.text2speech('Что мне вбить в поиск?')
+                    flag_browser = True
+                    flag_commands = False
+                    continue
                 elif answer == 'время':
-                    pass
+                    tts.text2speech(get_time())
                 elif answer == 'стим':
                     pass
                 elif answer == 'музыка':
@@ -92,7 +94,9 @@ with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device, dty
                 elif answer == 'for_ai':
                     answer = generate_answer(text)
                     tts.text2speech(answer)
-                
+            
+            if "благодарю" in text or "спасибо" in text.lower():
+                voice_fast_callback(random.choice(thanks), chunk)   
             flag_ready = True
             flag_commands = False
         else:
